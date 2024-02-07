@@ -10,3 +10,16 @@ services:
       - "8009:8000"
     env_file:
       - ./.env.dev
+    depends_on:
+      - dbmigration-db
+  dbmigration-db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=dbmanager
+      - POSTGRES_PASSWORD=dbmanager
+      - POSTGRES_DB=human_resource_dev
+
+volumes:
+  postgres_data:
