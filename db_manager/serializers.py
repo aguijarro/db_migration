@@ -9,7 +9,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
         fields = '__all__'
-        read_only_fields = ('id',)
+        read_only_fields = ()
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -17,4 +17,4 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = '__all__'
-        read_only_fields = ('id',)
+        read_only_fields = ()

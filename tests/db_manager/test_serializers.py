@@ -1,8 +1,9 @@
 from db_manager.serializers import DepartmentSerializer, JobSerializer
 
 
-def test_valid_department_serializer():
+def test_valid_department_serializer(db):
     valid_serializer_data = {
+        "id": 1,
         "department": "Accounting"
     }
     serializer = DepartmentSerializer(data=valid_serializer_data)
@@ -12,9 +13,9 @@ def test_valid_department_serializer():
     assert serializer.errors == {}
 
 
-def test_invalid_department_serializer():
+def test_invalid_department_serializer(db):
     invalid_serializer_data = {
-
+        "id": "1",
     }
     serializer = DepartmentSerializer(data=invalid_serializer_data)
     assert not serializer.is_valid()
@@ -23,8 +24,9 @@ def test_invalid_department_serializer():
     assert serializer.errors == {"department": ["This field is required."]}
 
 
-def test_valid_job_serializer():
+def test_valid_job_serializer(db):
     valid_serializer_data = {
+        "id": 1,
         "job": "Accounting"
     }
     serializer = JobSerializer(data=valid_serializer_data)
@@ -34,9 +36,9 @@ def test_valid_job_serializer():
     assert serializer.errors == {}
 
 
-def test_invalid_job_serializer():
+def test_invalid_job_serializer(db):
     invalid_serializer_data = {
-
+        "id": "1",
     }
     serializer = JobSerializer(data=invalid_serializer_data)
     assert not serializer.is_valid()
