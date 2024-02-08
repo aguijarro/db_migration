@@ -55,7 +55,7 @@ class TestDepartment:
     @pytest.mark.django_db
     def test_create_list_serializer(self, client):
         test_url = reverse(
-            "department-list-serializer",
+            "departments-list-serializer",
         )
 
         data = []
@@ -79,6 +79,74 @@ class TestDepartment:
 
         print("Result")
         print(response.json())
+        print(response.status_code)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        assert len(response.json()) == len(data)
+
+    @pytest.mark.django_db
+    def test_bulk_create_list_serializer(self, client):
+        test_url = reverse(
+            "departments-bulk-list-serializer",
+        )
+        data = []
+        with open('./external_files/departments.csv') as f:
+            cf = DictReader(f, fieldnames=['id', 'department'])
+            for row in cf:
+                data.append(
+                    {
+                        'id': row['id'],
+                        'department': row['department']
+                    }
+                )
+
+        response = client.post(
+            test_url,
+            data=json.dumps(
+                data
+            ),
+            content_type="application/json",
+        )
+
+        print("Result")
+        print(response.json())
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+        assert len(response.json()) == len(data)
+
+
+class TestHiredEmployees:
+    @pytest.mark.django_db
+    def test_bulk_create_list_serializer(self, client):
+        test_url = reverse(
+            "hired-employee-bulk-list-serializer",
+        )
+        data = []
+        with open('./external_files/hired_employees.csv') as f:
+            cf = DictReader(f, fieldnames=['id', 'name', 'datetime', 'department_id', 'job_id'])
+            for row in cf:
+                data.append(
+                    {
+                        'id': row['id'],
+                        'name': row['name'],
+                        'datetime': row['datetime'],
+                        'department_id': row['department_id'],
+                        'job_id': row['job_id']
+                    }
+                )
+
+        response = client.post(
+            test_url,
+            data=json.dumps(
+                data
+            ),
+            content_type="application/json",
+        )
+
+        print("Result")
+        print(response.json())
+
         assert response.status_code == status.HTTP_201_CREATED
 
         assert len(response.json()) == len(data)
