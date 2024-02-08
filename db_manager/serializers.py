@@ -23,6 +23,13 @@ class JobSerializer(serializers.ModelSerializer):
         read_only_fields = ()
 
 
+class HiredEmployeeSerializer(serializers.Serializer):
+    department = serializers.CharField()
+    job = serializers.CharField()
+    quarter = serializers.IntegerField()
+    total = serializers.IntegerField()
+
+
 class DepartmentBulkCreateListSerializer(serializers.ListSerializer):
     def create(self, validated_data):
 
@@ -142,3 +149,5 @@ class BulkHiredEmployeeSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ()
         list_serializer_class = HiredEmployeeBulkCreateListSerializer
+
+

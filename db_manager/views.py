@@ -3,9 +3,12 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
 from .serializers import (DepartmentSerializer, BulkDepartmentSerializer,
-                          BulkJobSerializer, BulkHiredEmployeeSerializer)
-from .models import Department, Job
+                          BulkJobSerializer, BulkHiredEmployeeSerializer,
+                          HiredEmployeeSerializer)
+from .models import Department, Job, HiredEmployee
 from datetime import datetime
+from django.db import connection
+import json
 
 
 # Create your views here.
@@ -99,3 +102,25 @@ class HiredEmployeeBulkListCreateView(generics.ListCreateAPIView):
             raise ValidationError("Invalid Input")
 
         return super(HiredEmployeeBulkListCreateView, self).post(request, *args, **kwargs)
+
+
+class EmployeesHiredQuarter(APIView):
+    def get(self, request, format=None):
+        sql = """
+            SELECT 
+                d.department
+                , j.job
+                , extract(quarter from h.datetime) as quarter
+                , count(*) total
+            FROM db_manager_hiredemployee h
+            INNER JOIN db_manager_department d on h.department_id_id = d.id
+            INNER JOIN db_manager_job j ON h.job_id_id = j.id
+            GROUP BY 1,2,3
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            hired_employee = cursor.fetchall()
+
+        serializer = HiredEmployeeSerializer(hired_employee, many=True)
+        return Response(serializer.data)

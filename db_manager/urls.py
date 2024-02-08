@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (DepartmentList, DepartmentListSerializer, DepartmentBulkListCreateView,
-                    JobBulkListCreateView, HiredEmployeeBulkListCreateView)
+                    JobBulkListCreateView, HiredEmployeeBulkListCreateView, EmployeesHiredQuarter)
 
 
 urlpatterns = [
@@ -16,4 +16,7 @@ urlpatterns = [
     path("api/hired-employee-bulk-list-serializer/",
          HiredEmployeeBulkListCreateView.as_view(),
          name="hired-employee-bulk-list-serializer"),
+    path("api/employees-hired-quarter/",
+         EmployeesHiredQuarter.as_view(),
+         name="employees-hired-quarter"),
 ]
