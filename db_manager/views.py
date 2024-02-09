@@ -1,6 +1,8 @@
 import requests
+import pandas as pd
 from csv import DictReader
 from datetime import datetime
+from json import loads, dumps
 from django.urls import reverse
 from django.db import connection
 from django.http import HttpResponse
@@ -120,22 +122,88 @@ class EmployeesHiredQuarter(APIView):
             FROM db_manager_hiredemployee h
             INNER JOIN db_manager_department d on h.department_id_id = d.id
             INNER JOIN db_manager_job j ON h.job_id_id = j.id
+            WHERE extract(YEAR from h.datetime) = 2021
             GROUP BY 1,2,3
+            ORDER BY 1,2
         """
 
         with connection.cursor() as cursor:
             cursor.execute(sql)
             hired_employee = cursor.fetchall()
 
-        print(type(hired_employee))
-        print(hired_employee)
+        df = pd.DataFrame(hired_employee, columns=['department', 'job', 'quarter', 'total'])
+        df_rst = df.pivot_table('total', ['department', 'job'], 'quarter').reset_index()
+        df_rst.fillna(0, inplace=True)
 
-        serializer = HiredEmployeeSerializer(hired_employee, many=True)
-        print("Serializar")
-        print(serializer)
+        print(df_rst)
 
-        #return Response(serializer)
-        return HttpResponse(hired_employee, content_type='application/json')
+        result = df_rst.to_json(orient="index")
+        parsed = loads(result)
+        df_dumps = dumps(parsed, indent=4)
+
+        return HttpResponse(df_dumps, content_type='application/json')
+
+
+class EmployeesHiredDepartment(APIView):
+    def get(self, request, format=None):
+        sql = """
+            with totals as (
+                SELECT 
+                    d.id
+                    , d.department
+                    , count(h.id) total
+                FROM db_manager_hiredemployee h
+                INNER JOIN db_manager_department d on h.department_id_id = d.id
+                GROUP BY 1,2
+            ), totals_2021 as (
+                SELECT 
+                    extract(YEAR from h.datetime) hired_year
+                    , d.id
+                    , d.department
+                    , count(h.id) total
+                FROM db_manager_hiredemployee h
+                INNER JOIN db_manager_department d on h.department_id_id = d.id
+                WHERE extract(YEAR from h.datetime) = 2021
+                GROUP BY 1,2,3
+            ), average_year_2021 as (
+                SELECT 
+                    t.hired_year, 
+                    avg(t.total) average_year_2021
+                FROM totals_2021 t
+                GROUP BY 1
+            ), total_average as (
+                SELECT
+                    t.id
+                    , t.department
+                    , t.total
+                    , ay.average_year_2021
+                FROM totals t, average_year_2021 ay
+            ), result as (
+                SELECT
+                    ta.id
+                    , ta.department
+                    , ta.total
+                FROM total_average ta
+                WHERE ta.total > ta.average_year_2021
+                ORDER BY ta.total DESC
+            )
+            select *
+            from result
+
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            hired_employee = cursor.fetchall()
+
+        df = pd.DataFrame(hired_employee, columns=['id', 'department', 'total'])
+
+        result = df.to_json(orient="index")
+        parsed = loads(result)
+        df_dumps = dumps(parsed, indent=4)
+
+        return HttpResponse(df_dumps, content_type='application/json')
+
 
 
 def post_department_data(request):
