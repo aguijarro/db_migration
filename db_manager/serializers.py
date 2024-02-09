@@ -24,10 +24,10 @@ class JobSerializer(serializers.ModelSerializer):
 
 
 class HiredEmployeeSerializer(serializers.Serializer):
-    department = serializers.CharField()
-    job = serializers.CharField()
-    quarter = serializers.IntegerField()
-    total = serializers.IntegerField()
+    department = serializers.CharField(max_length=200)
+    #job = serializers.CharField()
+    #quarter = serializers.IntegerField()
+    #total = serializers.IntegerField()
 
 
 class DepartmentBulkCreateListSerializer(serializers.ListSerializer):

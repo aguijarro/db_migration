@@ -1,14 +1,19 @@
+import requests
+from csv import DictReader
+from datetime import datetime
+from django.urls import reverse
+from django.db import connection
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
+from rest_framework.renderers import JSONRenderer
 from .serializers import (DepartmentSerializer, BulkDepartmentSerializer,
                           BulkJobSerializer, BulkHiredEmployeeSerializer,
                           HiredEmployeeSerializer)
 from .models import Department, Job, HiredEmployee
-from datetime import datetime
-from django.db import connection
-import json
+
 
 
 # Create your views here.
@@ -122,5 +127,35 @@ class EmployeesHiredQuarter(APIView):
             cursor.execute(sql)
             hired_employee = cursor.fetchall()
 
+        print(type(hired_employee))
+        print(hired_employee)
+
         serializer = HiredEmployeeSerializer(hired_employee, many=True)
-        return Response(serializer.data)
+        print("Serializar")
+        print(serializer)
+
+        #return Response(serializer)
+        return HttpResponse(hired_employee, content_type='application/json')
+
+
+def post_department_data(request):
+    test_url = reverse(
+        "departments",
+    )
+    print("URL")
+    url = f"http://0.0.0.0:8000{test_url}"
+    print(url)
+    with open('./external_files/departments.csv') as f:
+        cf = DictReader(f, fieldnames=['id', 'department'])
+        for row in cf:
+            print("Read File")
+            print(row)
+            response = requests.post(
+                url,
+                data={
+                    'id': row['id'],
+                    'department': row['department']
+                }
+            )
+            print(response.json())
+    return HttpResponse("Departments")

@@ -26,7 +26,7 @@ class Job(models.Model):
 
 class HiredEmployee(models.Model):
     id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, null=True)
     datetime = models.DateTimeField(null=True)
     department_id = models.ForeignKey(Department, on_delete=models.CASCADE, null=False)
     job_id = models.ForeignKey(Job, on_delete=models.CASCADE, null=False)

@@ -3,7 +3,7 @@ from csv import DictReader
 
 
 def load_department():
-    url = 'http://localhost:8009/api/departments/'
+    url = 'http://localhost:8000/api/departments/'
 
     with open('../external_files/departments.csv') as f:
         cf = DictReader(f, fieldnames=['id', 'department'])
